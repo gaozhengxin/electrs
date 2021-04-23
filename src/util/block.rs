@@ -125,12 +125,12 @@ impl HeaderList {
                 blockhash: header.bitcoin_hash(),
                 header,
             }));
-        for i in 1..hashed_headers.len() {
-            assert_eq!(
-                hashed_headers[i].header.prev_blockhash,
-                hashed_headers[i - 1].blockhash
-            );
-        }
+        //for i in 1..hashed_headers.len() {
+            //assert_eq!(
+            //    hashed_headers[i].header.prev_blockhash,
+            //    hashed_headers[i - 1].blockhash
+            //);
+        //}
         let prev_blockhash = match hashed_headers.first() {
             Some(h) => h.header.prev_blockhash,
             None => return vec![], // hashed_headers is empty

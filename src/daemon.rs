@@ -104,9 +104,11 @@ pub struct BlockchainInfo {
     pub blocks: u32,
     pub headers: u32,
     pub bestblockhash: String,
-    pub pruned: bool,
+    pub difficulty: f32,
+    pub pruned: Option<bool>,
     pub verificationprogress: f32,
     pub initialblockdownload: Option<bool>,
+    pub chainwork: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -312,7 +314,7 @@ impl Daemon {
         }
         let blockchain_info = daemon.getblockchaininfo()?;
         info!("{:?}", blockchain_info);
-        if blockchain_info.pruned {
+        if !blockchain_info.pruned.unwrap_or(true) {
             bail!("pruned node is not supported (use '-prune=0' bitcoind flag)".to_owned())
         }
         loop {
@@ -586,8 +588,15 @@ impl Daemon {
         }
 
         let mut blockhash = BlockHash::default();
+        let mut version = 1;
         for header in &result {
-            assert_eq!(header.prev_blockhash, blockhash);
+            match version {
+                1 | 2 | 3 | 4 => {},
+                _ => {
+                    assert_eq!(header.prev_blockhash, blockhash);
+                }
+            }
+            version = header.version;
             blockhash = header.bitcoin_hash();
         }
         assert_eq!(blockhash, *tip);

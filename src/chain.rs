@@ -53,7 +53,8 @@ impl Network {
 
     pub fn magic(self) -> u32 {
         match self {
-            Network::Bitcoin => 0xD9B4_BEF9,
+            //Network::Bitcoin => 0xD9B4_BEF9,
+            Network::Bitcoin => 0xEAFEC591, // 条件编译我不会用，所以就直接改掉了
             Network::Testnet => 0x0709_110B,
             Network::Regtest => 0xDAB5_BFFA,
 

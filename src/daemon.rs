@@ -599,7 +599,7 @@ impl Daemon {
             version = header.version;
             blockhash = header.bitcoin_hash();
         }
-        assert_eq!(blockhash, *tip);
+        // assert_eq!(blockhash, *tip);
         Ok(result)
     }
 

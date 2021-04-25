@@ -164,7 +164,7 @@ dependencies = [
 [[package]]
 name = "bitcoin"
 version = "0.23.0"
-source = "git+https://github.com/gaozhengxin/rust-bitcoin?rev=v0.0.0-colx#4c48d6620b812e6ac227dccc367073b8000812bf"
+source = "git+https://github.com/gaozhengxin/rust-bitcoin?rev=v0.0.1-colx#6b1550f8b21118ce9b886f606775049f13f5f38d"
 dependencies = [
  "bech32",
  "bitcoin_hashes",

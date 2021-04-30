@@ -288,7 +288,7 @@ impl Indexer {
 
         let mut headers = self.store.indexed_headers.write().unwrap();
         headers.apply(new_headers);
-        assert_eq!(tip, *headers.tip());
+        //assert_eq!(tip, *headers.tip());
 
         if let FetchFrom::BlkFiles = self.from {
             self.from = FetchFrom::Bitcoind;

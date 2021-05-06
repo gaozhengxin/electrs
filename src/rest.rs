@@ -637,7 +637,7 @@ fn handle_request(
             blocks(&query, &config, start_height)
         }
         (&Method::GET, Some(&"block-height"), Some(height), None, None, None) => {
-            let height = height.parse::<usize>()?;
+            let height = height.parse::<usize>()? - 499999;
             let header = query
                 .chain()
                 .header_by_height(height)
@@ -651,7 +651,8 @@ fn handle_request(
                 .chain()
                 .get_block_with_meta(&hash)
                 .ok_or_else(|| HttpError::not_found("Block not found".to_string()))?;
-            let block_value = BlockValue::new(blockhm, config.network_type);
+            let mut block_value = BlockValue::new(blockhm, config.network_type);
+            block_value.height = block_value.height + 499999;
             json_response(block_value, TTL_LONG)
         }
         (&Method::GET, Some(&"block"), Some(hash), Some(&"status"), None, None) => {
@@ -1159,6 +1160,7 @@ fn blocks(
 
         #[allow(unused_mut)]
         let mut value = BlockValue::new(blockhm, config.network_type);
+        value.height = value.height + 499999;
 
         #[cfg(feature = "liquid")]
         {

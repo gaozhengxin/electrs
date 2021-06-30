@@ -91,6 +91,13 @@ impl HeaderList {
         let null_hash = BlockHash::default();
 
         while blockhash != null_hash {
+            //let header = headers_map.remove(&blockhash).unwrap_or_else(|| {
+                //panic!(
+                //    "missing expected blockhash in headers map: {:?}, pointed from: {:?}",
+                //    blockhash,
+                //    headers_chain.last().map(|h| h.bitcoin_hash())
+                //)
+            //});
             let header = headers_map.remove(&blockhash).unwrap_or_else(|| {
                 BlockHeader{
                     version: 0,
@@ -101,15 +108,21 @@ impl HeaderList {
                     nonce: 2083236893,
                     acc_checkpoint: BlockHash::default(),
                 }
+
             });
-            //let header = headers_map.remove(&blockhash).unwrap_or_else(|| {
-            //    panic!(
-            //        "missing expected blockhash in headers map: {:?}, pointed from: {:?}",
-            //        blockhash,
-            //        headers_chain.last().map(|h| h.bitcoin_hash())
-            //    )
-            //});
             blockhash = header.prev_blockhash;
+            headers_chain.push(header);
+        }
+        for i in 1..500000 {
+            let header = BlockHeader{
+                version: 0,
+                prev_blockhash: Default::default(),
+                merkle_root: bitcoin::TxMerkleNode::default(),
+                time: 1231006505,
+                bits: 0x1d00ffff,
+                nonce: 2083236893,
+                acc_checkpoint: BlockHash::default(),
+            };
             headers_chain.push(header);
         }
         headers_chain.reverse();
@@ -136,12 +149,14 @@ impl HeaderList {
                 blockhash: header.bitcoin_hash(),
                 header,
             }));
-        //for i in 1..hashed_headers.len() {
-            //assert_eq!(
-            //    hashed_headers[i].header.prev_blockhash,
-            //    hashed_headers[i - 1].blockhash
-            //);
-        //}
+        for i in 1..hashed_headers.len() {
+            if i > 500000 {
+                assert_eq!(
+                    hashed_headers[i].header.prev_blockhash,
+                    hashed_headers[i - 1].blockhash
+                );
+            }
+        }
         let prev_blockhash = match hashed_headers.first() {
             Some(h) => h.header.prev_blockhash,
             None => return vec![], // hashed_headers is empty
@@ -169,10 +184,12 @@ impl HeaderList {
         // new_headers[i] -> new_headers[i - 1] (i.e. new_headers.last() is the tip)
         for i in 1..new_headers.len() {
             assert_eq!(new_headers[i - 1].height() + 1, new_headers[i].height());
-            //assert_eq!(
-            //    *new_headers[i - 1].hash(),
-            //    new_headers[i].header().prev_blockhash
-            //);
+            if i > 500000 {
+                assert_eq!(
+                    *new_headers[i - 1].hash(),
+                    new_headers[i].header().prev_blockhash
+                );
+            }
         }
         let new_height = match new_headers.first() {
             Some(entry) => {

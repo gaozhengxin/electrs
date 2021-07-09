@@ -76,6 +76,7 @@ codegen-units = 1
 
 [patch.crates-io.bitcoin]
 git = "https://github.com/gaozhengxin/rust-bitcoin"
+path = "/home/justin/rust-bitcoin/rust-bitcoin"
 rev = "v0.0.1-colx"
 
 [patch.crates-io.elements]

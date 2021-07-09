@@ -306,15 +306,15 @@ impl Daemon {
         };
         let network_info = daemon.getnetworkinfo()?;
         info!("{:?}", network_info);
-        if network_info.version < 16_00_00 {
+        /*if network_info.version < 16_00_00 {
             bail!(
                 "{} is not supported - please use bitcoind 0.16+",
                 network_info.subversion,
             )
-        }
+        }*/
         let blockchain_info = daemon.getblockchaininfo()?;
         info!("{:?}", blockchain_info);
-        if !blockchain_info.pruned.unwrap_or(true) {
+        if blockchain_info.pruned {
             bail!("pruned node is not supported (use '-prune=0' bitcoind flag)".to_owned())
         }
         loop {

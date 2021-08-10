@@ -284,6 +284,7 @@ impl Daemon {
         signal: Waiter,
         metrics: &Metrics,
     ) -> Result<Daemon> {
+        println!("111111111111111111");
         let daemon = Daemon {
             daemon_dir: daemon_dir.clone(),
             blocks_dir: blocks_dir.clone(),
@@ -314,7 +315,7 @@ impl Daemon {
         }*/
         let blockchain_info = daemon.getblockchaininfo()?;
         info!("{:?}", blockchain_info);
-        if blockchain_info.pruned {
+        if blockchain_info.pruned.unwrap_or(true) {
             bail!("pruned node is not supported (use '-prune=0' bitcoind flag)".to_owned())
         }
         loop {

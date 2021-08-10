@@ -106,7 +106,6 @@ impl HeaderList {
                     time: 1231006505,
                     bits: 0x1d00ffff,
                     nonce: 2083236893,
-                    acc_checkpoint: BlockHash::default(),
                 }
 
             });
@@ -121,7 +120,6 @@ impl HeaderList {
                 time: 1231006505,
                 bits: 0x1d00ffff,
                 nonce: 2083236893,
-                acc_checkpoint: BlockHash::default(),
             };
             headers_chain.push(header);
         }

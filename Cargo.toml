@@ -59,6 +59,7 @@ electrum-client = { version = "0.1.0-beta.6", optional = true }
 
 [dependencies.bitcoin]
 version = "0.23.0"
+path = "/home/justin/rust-bitcoin/rust-bitcoin"
 features = ["use-serde"]
 
 [dependencies.elements]
@@ -73,11 +74,6 @@ tempfile = "3.0"
 lto = true
 panic = 'abort'
 codegen-units = 1
-
-[patch.crates-io.bitcoin]
-git = "https://github.com/gaozhengxin/rust-bitcoin"
-path = "/home/justin/rust-bitcoin/rust-bitcoin"
-rev = "v0.0.1-colx"
 
 [patch.crates-io.elements]
 git = "https://github.com/elementsproject/rust-elements"

@@ -106,6 +106,10 @@ impl HeaderList {
                     time: 1231006505,
                     bits: 0x1d00ffff,
                     nonce: 2083236893,
+                    version_mtp: Default::default(),
+                    mtp_hash_value: Default::default(),
+                    reserved0: Default::default(),
+                    reserved1: Default::default(),
                 }
 
             });
@@ -120,6 +124,10 @@ impl HeaderList {
                 time: 1231006505,
                 bits: 0x1d00ffff,
                 nonce: 2083236893,
+                version_mtp: Default::default(),
+                mtp_hash_value: Default::default(),
+                reserved0: Default::default(),
+                reserved1: Default::default(),
             };
             headers_chain.push(header);
         }

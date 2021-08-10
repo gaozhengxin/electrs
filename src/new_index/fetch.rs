@@ -222,6 +222,9 @@ fn parse_blocks(blob: Vec<u8>, magic: u32) -> Result<Vec<SizedBlock>> {
             Err(_) => break, // EOF
         }
 
+        println!("start is {:?}", start);
+        println!("end is {:?}", end);
+        println!("block_size is {:?}", block_size);
         slices.push((&blob[start..end], block_size));
     }
 

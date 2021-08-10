@@ -579,6 +579,7 @@ impl Daemon {
             .as_u64()
             .expect("non-numeric height") as usize;
         let all_heights: Vec<usize> = (0..=tip_height).collect();
+        //let chunk_size = 1;
         let chunk_size = 100_000;
         let mut result = vec![];
         for heights in all_heights.chunks(chunk_size) {
@@ -591,13 +592,7 @@ impl Daemon {
         let mut blockhash = BlockHash::default();
         let mut version = 1;
         for header in &result {
-            match version {
-                1 | 2 | 3 | 4 => {},
-                _ => {
-                    assert_eq!(header.prev_blockhash, blockhash);
-                }
-            }
-            version = header.version;
+            //assert_eq!(header.prev_blockhash, blockhash);
             blockhash = header.bitcoin_hash();
         }
         // assert_eq!(blockhash, *tip);

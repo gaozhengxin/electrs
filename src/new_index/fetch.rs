@@ -79,7 +79,7 @@ fn bitcoind_fetcher(
     Ok(Fetcher::from(
         chan.into_receiver(),
         spawn_thread("bitcoind_fetcher", move || {
-            for entries in new_headers.chunks(100) {
+            for entries in new_headers.chunks(1) {
                 let blockhashes: Vec<BlockHash> = entries.iter().map(|e| *e.hash()).collect();
                 let blocks = daemon
                     .getblocks(&blockhashes)
@@ -225,7 +225,12 @@ fn parse_blocks(blob: Vec<u8>, magic: u32) -> Result<Vec<SizedBlock>> {
         println!("start is {:?}", start);
         println!("end is {:?}", end);
         println!("block_size is {:?}", block_size);
-        slices.push((&blob[start..end], block_size));
+        println!("len is {:?}", blob.len());
+        if (blob.len() < end - start) {
+            slices.push((&blob[start..blob.len()], block_size));
+        } else {
+            slices.push((&blob[start..end], block_size));
+        }
     }
 
     let pool = rayon::ThreadPoolBuilder::new()

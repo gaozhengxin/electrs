@@ -464,7 +464,8 @@ impl Daemon {
         let block = block_from_value(
             self.request("getblock", json!([blockhash.to_hex(), /*verbose=*/ false]))?,
         )?;
-        assert_eq!(block.bitcoin_hash(), *blockhash);
+        //assert_eq!(block.bitcoin_hash(), *blockhash);
+        assert_eq!(block.block_hash(), *blockhash);
         Ok(block)
     }
 
@@ -478,9 +479,15 @@ impl Daemon {
             .map(|hash| json!([hash.to_hex(), /*verbose=*/ false]))
             .collect();
         let values = self.requests("getblock", &params_list)?;
+        println!("lalalalala getblocks, length is {:?}", values.len());
         let mut blocks = vec![];
+        let mut i = 0;
         for value in values {
+            println!("i is {:?}", i);
+            println!("blockhash is {:?}", blockhashes[i]);
             blocks.push(block_from_value(value)?);
+            println!("ok");
+            i = i + 1;
         }
         Ok(blocks)
     }
@@ -572,6 +579,7 @@ impl Daemon {
     }
 
     fn get_all_headers(&self, tip: &BlockHash) -> Result<Vec<BlockHeader>> {
+        println!("lalalalalala get_all_headers");
         let info: Value = self.request("getblockheader", json!([tip.to_hex()]))?;
         let tip_height = info
             .get("height")
@@ -579,8 +587,8 @@ impl Daemon {
             .as_u64()
             .expect("non-numeric height") as usize;
         let all_heights: Vec<usize> = (0..=tip_height).collect();
-        //let chunk_size = 1;
-        let chunk_size = 100_000;
+        let chunk_size = 1;
+        //let chunk_size = 100_000;
         let mut result = vec![];
         for heights in all_heights.chunks(chunk_size) {
             trace!("downloading {} block headers", heights.len());
@@ -592,10 +600,11 @@ impl Daemon {
         let mut blockhash = BlockHash::default();
         let mut version = 1;
         for header in &result {
-            //assert_eq!(header.prev_blockhash, blockhash);
-            blockhash = header.bitcoin_hash();
+            assert_eq!(header.prev_blockhash, blockhash);
+            //blockhash = header.bitcoin_hash();
+            blockhash = header.block_hash();
         }
-        // assert_eq!(blockhash, *tip);
+        assert_eq!(blockhash, *tip);
         Ok(result)
     }
 
@@ -619,6 +628,7 @@ impl Daemon {
         let null_hash = BlockHash::default();
         let mut blockhash = *bestblockhash;
         while blockhash != null_hash {
+            println!("lalalala get_new_headers {:?}", blockhash);
             if indexed_headers.header_by_blockhash(&blockhash).is_some() {
                 break;
             }

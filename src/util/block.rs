@@ -152,7 +152,8 @@ impl HeaderList {
         }
         let hashed_headers =
             Vec::<HashedHeader>::from_iter(new_headers.into_iter().map(|header| HashedHeader {
-                blockhash: header.bitcoin_hash(),
+                //blockhash: header.bitcoin_hash(),
+                blockhash: header.block_hash(),
                 header,
             }));
         for i in 1..hashed_headers.len() {

@@ -78,7 +78,8 @@ impl BlockValue {
     fn new(blockhm: BlockHeaderMeta, network: Network) -> Self {
         let header = blockhm.header_entry.header();
         BlockValue {
-            id: header.bitcoin_hash().to_hex(),
+            //id: header.bitcoin_hash().to_hex(),
+            id: header.block_hash().to_hex(),
             height: blockhm.header_entry.height() as u32,
             version: header.version,
             timestamp: header.time,
@@ -943,7 +944,8 @@ fn handle_request(
 
             let height = query
                 .chain()
-                .height_by_hash(&merkleblock.header.bitcoin_hash());
+                //.height_by_hash(&merkleblock.header.bitcoin_hash());
+                .height_by_hash(&merkleblock.header.block_hash());
 
             http_message(
                 StatusCode::OK,

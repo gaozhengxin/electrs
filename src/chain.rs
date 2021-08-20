@@ -1,5 +1,5 @@
 #[cfg(not(feature = "liquid"))] // use regular Bitcoin data structures
-pub use bitcoin::{util::address, Block, BlockHeader, OutPoint, Transaction, TxIn, TxOut};
+pub use bitcoin::{util::address, Block, BlockHeader, BlockRes, OutPoint, Transaction, TxIn, TxOut};
 
 #[cfg(feature = "liquid")]
 pub use {

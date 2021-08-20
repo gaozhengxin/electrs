@@ -116,21 +116,6 @@ impl HeaderList {
             blockhash = header.prev_blockhash;
             headers_chain.push(header);
         }
-        for i in 1..500000 {
-            let header = BlockHeader{
-                version: 0,
-                prev_blockhash: Default::default(),
-                merkle_root: bitcoin::TxMerkleNode::default(),
-                time: 1231006505,
-                bits: 0x1d00ffff,
-                nonce: 2083236893,
-                version_mtp: Default::default(),
-                mtp_hash_value: Default::default(),
-                reserved0: Default::default(),
-                reserved1: Default::default(),
-            };
-            headers_chain.push(header);
-        }
         headers_chain.reverse();
 
         trace!(
@@ -157,15 +142,19 @@ impl HeaderList {
                 header,
             }));
         for i in 1..hashed_headers.len() {
-            if i > 500000 {
-                assert_eq!(
-                    hashed_headers[i].header.prev_blockhash,
-                    hashed_headers[i - 1].blockhash
-                );
-            }
+            assert_eq!(
+                hashed_headers[i].header.prev_blockhash,
+                hashed_headers[i - 1].blockhash
+            );
         }
         let prev_blockhash = match hashed_headers.first() {
-            Some(h) => h.header.prev_blockhash,
+            Some(h) => {
+                println!("prev blockhash is {:?}", h.header.prev_blockhash);
+                if (format!("{:x}", h.header.prev_blockhash) == "4381deb85b1b2c9843c222944b616d997516dcbd6a964e1eaf0def0830695233".to_string()) {
+                    return vec![];
+                }
+                h.header.prev_blockhash
+            },
             None => return vec![], // hashed_headers is empty
         };
         let null_hash = BlockHash::default();
@@ -191,12 +180,10 @@ impl HeaderList {
         // new_headers[i] -> new_headers[i - 1] (i.e. new_headers.last() is the tip)
         for i in 1..new_headers.len() {
             assert_eq!(new_headers[i - 1].height() + 1, new_headers[i].height());
-            if i > 500000 {
-                assert_eq!(
-                    *new_headers[i - 1].hash(),
-                    new_headers[i].header().prev_blockhash
-                );
-            }
+            assert_eq!(
+                *new_headers[i - 1].hash(),
+                new_headers[i].header().prev_blockhash
+            );
         }
         let new_height = match new_headers.first() {
             Some(entry) => {

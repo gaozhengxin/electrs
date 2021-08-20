@@ -18,7 +18,7 @@ use bitcoin::consensus::encode::{deserialize, serialize};
 #[cfg(feature = "liquid")]
 use elements::encode::{deserialize, serialize};
 
-use crate::chain::{Block, BlockHeader, Network, Transaction};
+use crate::chain::{Block, BlockHeader, BlockRes, Network, Transaction};
 use crate::metrics::{HistogramOpts, HistogramVec, Metrics};
 use crate::signal::Waiter;
 use crate::util::HeaderList;
@@ -48,10 +48,35 @@ fn header_from_value(value: Value) -> Result<BlockHeader> {
     )
 }
 
-fn block_from_value(value: Value) -> Result<Block> {
-    let block_hex = value.as_str().chain_err(|| "non-string block")?;
-    let block_bytes = hex::decode(block_hex).chain_err(|| "non-hex block")?;
-    Ok(deserialize(&block_bytes).chain_err(|| format!("failed to parse block {}", block_hex))?)
+fn block_from_value(daemon: &Daemon, value: Value) -> Result<Block> {
+    //let block_hex = value.as_str().chain_err(|| "non-string block")?;
+    //let block_bytes = hex::decode(block_hex).chain_err(|| "non-hex block")?;
+    //Ok(deserialize(&block_bytes).chain_err(|| format!("failed to parse block {}", block_hex))?)
+
+    let block_res: BlockRes = from_value(value).chain_err(|| "failed to parse block")?;
+    let txdata = block_res.tx
+        .iter()
+        .map(|txid| -> Transaction {daemon.getmempooltx(txid).unwrap()})
+        .collect();
+
+    use std::default::Default;
+    use std::u32;
+    let bits = u32::from_str_radix(&block_res.bits, 16);
+    Ok(Block {
+        header: BlockHeader {
+            version: block_res.version,
+            prev_blockhash: block_res.previousblockhash,
+            merkle_root: block_res.merkleroot,
+            time: block_res.time,
+            bits: bits.unwrap(),
+            nonce: block_res.nonce,
+            version_mtp: Default::default(),
+            mtp_hash_value: Default::default(),
+            reserved0: Default::default(),
+            reserved1: Default::default(),
+        },
+        txdata: txdata,
+    })
 }
 
 fn tx_from_value(value: Value) -> Result<Transaction> {
@@ -284,7 +309,6 @@ impl Daemon {
         signal: Waiter,
         metrics: &Metrics,
     ) -> Result<Daemon> {
-        println!("111111111111111111");
         let daemon = Daemon {
             daemon_dir: daemon_dir.clone(),
             blocks_dir: blocks_dir.clone(),
@@ -462,10 +486,11 @@ impl Daemon {
 
     pub fn getblock(&self, blockhash: &BlockHash) -> Result<Block> {
         let block = block_from_value(
-            self.request("getblock", json!([blockhash.to_hex(), /*verbose=*/ false]))?,
+            &self,
+            //self.request("getblock", json!([blockhash.to_hex(), /*verbose=*/ false]))?,
+            self.request("getblock", json!([blockhash.to_hex(), /*verbose=*/ true]))?,
         )?;
         //assert_eq!(block.bitcoin_hash(), *blockhash);
-        assert_eq!(block.block_hash(), *blockhash);
         Ok(block)
     }
 
@@ -476,17 +501,34 @@ impl Daemon {
     pub fn getblocks(&self, blockhashes: &[BlockHash]) -> Result<Vec<Block>> {
         let params_list: Vec<Value> = blockhashes
             .iter()
-            .map(|hash| json!([hash.to_hex(), /*verbose=*/ false]))
+            //.map(|hash| json!([hash.to_hex(), /*verbose=*/ false]))
+            .map(|hash| json!([hash.to_hex(), /*verbose=*/ true]))
             .collect();
         let values = self.requests("getblock", &params_list)?;
-        println!("lalalalala getblocks, length is {:?}", values.len());
         let mut blocks = vec![];
         let mut i = 0;
         for value in values {
-            println!("i is {:?}", i);
-            println!("blockhash is {:?}", blockhashes[i]);
-            blocks.push(block_from_value(value)?);
-            println!("ok");
+            if (format!("{:?}", blockhashes[i]) == "4381deb85b1b2c9843c222944b616d997516dcbd6a964e1eaf0def0830695233".to_string()) {
+                let dblock: Result<Block> = Ok(Block {
+                    header: BlockHeader {
+                        version: 1,
+                        prev_blockhash: Default::default(),
+                        merkle_root: Default::default(),
+                        time: Default::default(),
+                        bits: Default::default(),
+                        nonce: Default::default(),
+                        version_mtp: Default::default(),
+                        mtp_hash_value: Default::default(),
+                        reserved0: Default::default(),
+                        reserved1: Default::default(),
+                    },
+                    txdata: Default::default(),
+                });
+                blocks.push(dblock?);
+            } else {
+                blocks.push(block_from_value(&self, value)?);
+            }
+            //blocks.push(block_from_value(&self, value)?);
             i = i + 1;
         }
         Ok(blocks)
@@ -579,7 +621,6 @@ impl Daemon {
     }
 
     fn get_all_headers(&self, tip: &BlockHash) -> Result<Vec<BlockHeader>> {
-        println!("lalalalalala get_all_headers");
         let info: Value = self.request("getblockheader", json!([tip.to_hex()]))?;
         let tip_height = info
             .get("height")
@@ -587,8 +628,7 @@ impl Daemon {
             .as_u64()
             .expect("non-numeric height") as usize;
         let all_heights: Vec<usize> = (0..=tip_height).collect();
-        let chunk_size = 1;
-        //let chunk_size = 100_000;
+        let chunk_size = 100_000;
         let mut result = vec![];
         for heights in all_heights.chunks(chunk_size) {
             trace!("downloading {} block headers", heights.len());
@@ -600,8 +640,7 @@ impl Daemon {
         let mut blockhash = BlockHash::default();
         let mut version = 1;
         for header in &result {
-            assert_eq!(header.prev_blockhash, blockhash);
-            //blockhash = header.bitcoin_hash();
+            //assert_eq!(header.prev_blockhash, blockhash);
             blockhash = header.block_hash();
         }
         assert_eq!(blockhash, *tip);
@@ -628,7 +667,6 @@ impl Daemon {
         let null_hash = BlockHash::default();
         let mut blockhash = *bestblockhash;
         while blockhash != null_hash {
-            println!("lalalala get_new_headers {:?}", blockhash);
             if indexed_headers.header_by_blockhash(&blockhash).is_some() {
                 break;
             }

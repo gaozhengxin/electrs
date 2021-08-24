@@ -436,6 +436,7 @@ impl Mempool {
             .iter()
             .filter(|outpoint| !confirmed_txos.contains_key(outpoint))
             .map(|outpoint| {
+                println!("outpoint is {:?}", outpoint);
                 self.txstore
                     .get(&outpoint.txid)
                     .and_then(|tx| tx.output.get(outpoint.vout as usize).cloned())

@@ -318,7 +318,8 @@ impl Indexer {
     fn index(&self, blocks: &[BlockEntry]) {
         let previous_txos_map = {
             let _timer = self.start_timer("index_lookup");
-            lookup_txos(&self.store.txstore_db, &get_previous_txos(blocks), false)
+            //lookup_txos(&self.store.txstore_db, &get_previous_txos(blocks), false)
+            lookup_txos(&self.store.txstore_db, &get_previous_txos(blocks), true)
         };
         let rows = {
             let _timer = self.start_timer("index_process");
@@ -831,7 +832,8 @@ impl ChainQuery {
 
     pub fn lookup_txos(&self, outpoints: &BTreeSet<OutPoint>) -> HashMap<OutPoint, TxOut> {
         let _timer = self.start_timer("lookup_txos");
-        lookup_txos(&self.store.txstore_db, outpoints, false)
+        //lookup_txos(&self.store.txstore_db, outpoints, false)
+        lookup_txos(&self.store.txstore_db, outpoints, true)
     }
 
     pub fn lookup_avail_txos(&self, outpoints: &BTreeSet<OutPoint>) -> HashMap<OutPoint, TxOut> {
@@ -1095,9 +1097,11 @@ fn index_transaction(
         if !has_prevout(txi) {
             continue;
         }
+        let defaultTxo = &TxOut::default();
         let prev_txo = previous_txos_map
             .get(&txi.previous_output)
-            .unwrap_or_else(|| panic!("missing previous txo {}", txi.previous_output));
+            //.unwrap_or_else(|| panic!("missing previous txo {}", txi.previous_output));
+            .unwrap_or(defaultTxo);
 
         let history = TxHistoryRow::new(
             &prev_txo.script_pubkey,

@@ -51,7 +51,8 @@ fn header_from_value(value: Value) -> Result<BlockHeader> {
 fn block_from_value(daemon: &Daemon, value: Value) -> Result<Block> {
     //let block_hex = value.as_str().chain_err(|| "non-string block")?;
     //let block_bytes = hex::decode(block_hex).chain_err(|| "non-hex block")?;
-    //Ok(deserialize(&block_bytes).chain_err(|| format!("failed to parse block {}", block_hex))?)
+    //let res = deserialize::<Block>(&block_bytes);
+    //Ok(deserialize(&block_bytes).chain_err(|| format!("failed to parse block"))?)
 
     let block_res: BlockRes = from_value(value).chain_err(|| "failed to parse block")?;
     let txdata = block_res.tx
@@ -83,6 +84,12 @@ fn tx_from_value(value: Value) -> Result<Transaction> {
     let tx_hex = value.as_str().chain_err(|| "non-string tx")?;
     let tx_bytes = hex::decode(tx_hex).chain_err(|| "non-hex tx")?;
     Ok(deserialize(&tx_bytes).chain_err(|| format!("failed to parse tx {}", tx_hex))?)
+
+    /*use std::default::Default;
+    println!("tx_from_value, value: {:?}", value);
+    let tx: Transaction = from_value(value).chain_err(|| "failed to parse transaction")?;
+    println!("parse transaction {:?}", tx);
+    Ok(tx)*/
 }
 
 /// Parse JSONRPC error code, if exists.
@@ -538,6 +545,7 @@ impl Daemon {
         let params_list: Vec<Value> = txhashes
             .iter()
             .map(|txhash| json!([txhash.to_hex(), /*verbose=*/ false]))
+            //.map(|txhash| json!([txhash.to_hex(), /*verbose=*/ true]))
             .collect();
 
         let values = self.requests("getrawtransaction", &params_list)?;
@@ -565,8 +573,10 @@ impl Daemon {
         let value = self.request(
             "getrawtransaction",
             json!([txhash.to_hex(), /*verbose=*/ false]),
+            //json!([txhash.to_hex(), /*verbose=*/ true]),
         )?;
-        tx_from_value(value)
+        let res = tx_from_value(value);
+        res
     }
 
     pub fn getmempooltxids(&self) -> Result<HashSet<Txid>> {

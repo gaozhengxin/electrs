@@ -164,9 +164,12 @@ dependencies = [
 [[package]]
 name = "bitcoin"
 version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a32c9d2fa897cfbb0db45d71e3d2838666194abc4828c0f994e4b5c3bf85ba4"
 dependencies = [
  "bech32",
  "bitcoin_hashes",
+ "hex 0.3.2",
  "secp256k1",
  "serde",
 ]
@@ -174,12 +177,10 @@ dependencies = [
 [[package]]
 name = "bitcoin"
 version = "0.23.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a32c9d2fa897cfbb0db45d71e3d2838666194abc4828c0f994e4b5c3bf85ba4"
+source = "git+https://github.com/gaozhengxin/rust-bitcoin?rev=v0.0.1-firo#8d79eac996da13ba5df0d5a2d4302f7032d6df11"
 dependencies = [
  "bech32",
  "bitcoin_hashes",
- "hex 0.3.2",
  "secp256k1",
  "serde",
 ]
@@ -402,7 +403,7 @@ dependencies = [
  "arrayref",
  "base64 0.12.3",
  "bincode",
- "bitcoin 0.23.0",
+ "bitcoin 0.23.0 (git+https://github.com/gaozhengxin/rust-bitcoin?rev=v0.0.1-firo)",
  "bitcoin_hashes",
  "clap",
  "crossbeam-channel",

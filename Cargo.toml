@@ -60,7 +60,8 @@ electrum-client = { version = "0.1.0-beta.6", optional = true }
 
 [dependencies.bitcoin]
 version = "0.23.0"
-path = "/home/justin/rust-bitcoin/rust-bitcoin"
+git = "https://github.com/gaozhengxin/rust-bitcoin"
+rev = "v0.0.1-firo"
 features = ["use-serde"]
 
 [dependencies.elements]

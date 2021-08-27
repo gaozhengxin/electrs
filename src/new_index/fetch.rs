@@ -222,11 +222,7 @@ fn parse_blocks(blob: Vec<u8>, magic: u32) -> Result<Vec<SizedBlock>> {
             Err(_) => break, // EOF
         }
 
-        if (blob.len() < end - start) {
-            slices.push((&blob[start..blob.len()], block_size));
-        } else {
-            slices.push((&blob[start..end], block_size));
-        }
+        slices.push((&blob[start..end], block_size));
     }
 
     let pool = rayon::ThreadPoolBuilder::new()

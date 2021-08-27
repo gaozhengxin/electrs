@@ -436,12 +436,15 @@ impl Mempool {
             .iter()
             .filter(|outpoint| !confirmed_txos.contains_key(outpoint))
             .map(|outpoint| {
-                println!("outpoint is {:?}", outpoint);
-                self.txstore
-                    .get(&outpoint.txid)
-                    .and_then(|tx| tx.output.get(outpoint.vout as usize).cloned())
-                    .map(|txout| (*outpoint, txout))
-                    .chain_err(|| format!("missing outpoint {:?}", outpoint))
+                if (self.txstore.contains_key(&outpoint.txid)) {
+					self.txstore
+						.get(&outpoint.txid)
+						.and_then(|tx| tx.output.get(outpoint.vout as usize).cloned())
+						.map(|txout| (*outpoint, txout))
+						.chain_err(|| format!("missing outpoint {:?}", outpoint))
+                } else {
+                    Ok((*outpoint, TxOut::default()))
+                }
             })
             .collect::<Result<HashMap<OutPoint, TxOut>>>()?;
 

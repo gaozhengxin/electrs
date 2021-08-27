@@ -84,12 +84,6 @@ fn tx_from_value(value: Value) -> Result<Transaction> {
     let tx_hex = value.as_str().chain_err(|| "non-string tx")?;
     let tx_bytes = hex::decode(tx_hex).chain_err(|| "non-hex tx")?;
     Ok(deserialize(&tx_bytes).chain_err(|| format!("failed to parse tx {}", tx_hex))?)
-
-    /*use std::default::Default;
-    println!("tx_from_value, value: {:?}", value);
-    let tx: Transaction = from_value(value).chain_err(|| "failed to parse transaction")?;
-    println!("parse transaction {:?}", tx);
-    Ok(tx)*/
 }
 
 /// Parse JSONRPC error code, if exists.
@@ -575,8 +569,7 @@ impl Daemon {
             json!([txhash.to_hex(), /*verbose=*/ false]),
             //json!([txhash.to_hex(), /*verbose=*/ true]),
         )?;
-        let res = tx_from_value(value);
-        res
+        tx_from_value(value)
     }
 
     pub fn getmempooltxids(&self) -> Result<HashSet<Txid>> {

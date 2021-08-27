@@ -799,6 +799,7 @@ impl ChainQuery {
     }
 
     pub fn lookup_txn(&self, txid: &Txid, blockhash: Option<&BlockHash>) -> Option<Transaction> {
+        use bitcoin_hashes::hex::ToHex;
         let _timer = self.start_timer("lookup_txn");
         self.lookup_raw_txn(txid, blockhash).map(|rawtx| {
             let txn: Transaction = deserialize(&rawtx).expect("failed to parse Transaction");
@@ -979,6 +980,7 @@ fn add_transaction(
     rows: &mut Vec<DBRow>,
     iconfig: &IndexerConfig,
 ) {
+    println!("add tx {:?}", tx.txid());
     rows.push(TxConfRow::new(tx, blockhash).into_row());
 
     if !iconfig.light_mode {
